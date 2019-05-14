@@ -1,0 +1,28 @@
+pipeline{
+    agent any
+    tools {
+        nodejs 'nodeJS11'
+    }
+    stages{
+        stage("Build"){
+            steps{
+                unstash 'sources'
+                sh 'npm install'
+                sh 'npm run-script build'
+                stash includes: '**', name: 'build'
+            }
+        }
+        stage("Test"){
+            steps{
+                unstash 'build'
+                sh 'npm run-script test'
+                junit 'tests-results**/*.xml'
+            }
+        }
+    }
+    post{
+        success{
+            archiveArtifacts 'public/**/*'
+        }
+    }
+}
