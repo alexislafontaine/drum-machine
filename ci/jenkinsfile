@@ -14,13 +14,29 @@ pipeline{
         stage("Test"){
             steps{
                 unstash 'build'
-                sh 'npm run-script test'
-                junit 'tests-results**/*.xml'
+                sh 'npm run-script test'             
+            }
+            post{
+                always{
+                    junit 'tests-results**/*.xml'
+                }
+            }
+        }
+        stage("Deploy"){
+            steps{
+                unstash 'build'
+                sshPublisher(publishers: [sshPublisherDesc(configName: 'docker ssh Nginx', transfers: [sshTransfer(cleanRemote: false, excludes: '', execCommand: '', execTimeout: 120000, flatten: false, makeEmptyDirs: false, noDefaultExcludes: false, patternSeparator: '[, ]+', remoteDirectory: '/', remoteDirectorySDF: false, removePrefix: 'public', sourceFiles: 'public/**/*')], usePromotionTimestamp: false, useWorkspaceInPromotion: false, verbose: false)])
+            }
+        }
+        stage("Smoke test"){
+            steps{
+                sh label: 'test url', script: 'curl http://127.0.0.1:8081'
             }
         }
     }
     post{
         success{
+            unstash 'build'
             archiveArtifacts 'public/**/*'
         }
     }
