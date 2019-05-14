@@ -6,10 +6,9 @@ pipeline{
     stages{
         stage("Build"){
             steps{
-                unstash 'sources'
                 sh 'npm install'
                 sh 'npm run-script build'
-                stash includes: '**', name: 'build'
+                stash includes: 'public/**/*', name: 'build'
             }
         }
         stage("Test"){
