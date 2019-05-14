@@ -1,5 +1,7 @@
 pipeline{
-    agent linux
+    agent {
+        'linux'
+    }
     tools {
         nodejs 'nodeJS11'
     }
